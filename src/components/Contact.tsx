@@ -2,251 +2,369 @@
 
 import { useState } from "react";
 
-interface FormData {
-  name: string;
-  phone: string;
-  address: string;
-  service: string;
-  message: string;
-}
-
 const serviceOptions = [
-  "주방 하수구 청소",
-  "욕실 배수구 청소",
-  "변기 막힘 해결",
-  "하수관 고압세척",
-  "옥상 방수 공사",
-  "배관 누수 탐지",
-  "건물 하수관 준설",
-  "배수펌프 설치/수리",
-  "정화조 청소",
-  "기타 (전화 문의)",
+  { id: "drain", label: "하수구 막힘", icon: "🚰" },
+  { id: "leak", label: "누수 탐지", icon: "💧" },
+  { id: "sink", label: "싱크대 막힘", icon: "🍽️" },
+  { id: "toilet", label: "변기 막힘", icon: "🚽" },
+  { id: "bath", label: "욕실 배수구", icon: "🛁" },
+  { id: "pipe", label: "배관 고압세척", icon: "🔧" },
+  { id: "waterproof", label: "옥상 방수", icon: "🏠" },
+  { id: "pump", label: "배수펌프", icon: "⚡" },
+  { id: "septic", label: "정화조 청소", icon: "🧹" },
 ];
 
+const placeTypes = ["아파트", "빌라", "주택", "오피스텔", "상가", "공장/창고", "기타"];
+const regions = ["서울", "경기", "인천", "부산", "대구", "대전", "광주", "기타"];
+
+type Step = 1 | 2 | 3;
+
 export default function Contact() {
-  const [form, setForm] = useState<FormData>({
-    name: "",
-    phone: "",
-    address: "",
-    service: "",
-    message: "",
-  });
+  const [step, setStep] = useState<Step>(1);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const [form, setForm] = useState({
+    isFirstVisit: "" as "yes" | "no" | "",
+    services: [] as string[],
+    placeType: "",
+    region: "",
+    address: "",
+    isUrgent: "" as "yes" | "no" | "",
+    phone: "",
+    visitDate: "",
+    requestedTech: "",
+    message: "",
+    eventAccount: "",
+    eventName: "",
+  });
+
+  const toggleService = (id: string) => {
+    setForm(f => ({
+      ...f,
+      services: f.services.includes(id)
+        ? f.services.filter(s => s !== id)
+        : [...f.services, id],
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise(r => setTimeout(r, 1200));
     setLoading(false);
     setSubmitted(true);
   };
 
+  const canNext1 = form.isFirstVisit && form.services.length > 0 && form.placeType && form.region;
+  const canNext2 = form.address && form.isUrgent && form.phone.length >= 10;
+
+  if (submitted) {
+    return (
+      <section id="contact" className="py-24 bg-gradient-to-br from-blue-50 to-white">
+        <div className="max-w-2xl mx-auto px-4 text-center">
+          <div className="bg-white rounded-3xl shadow-xl p-12 border border-blue-100">
+            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-10 h-10 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="text-2xl font-extrabold text-gray-900 mb-3">견적 요청이 완료됐습니다!</h3>
+            <p className="text-gray-500 mb-2">담당자가 <strong className="text-[#0073f5]">10분 이내</strong>로 연락드립니다.</p>
+            <p className="text-gray-400 text-sm mb-8">급하시면 <a href="tel:1588-0000" className="text-[#0073f5] font-bold underline">1588-0000</a>으로 바로 전화해 주세요.</p>
+            <button
+              onClick={() => { setSubmitted(false); setStep(1); setForm({ isFirstVisit: "", services: [], placeType: "", region: "", address: "", isUrgent: "", phone: "", visitDate: "", requestedTech: "", message: "", eventAccount: "", eventName: "" }); }}
+              className="bg-[#0073f5] hover:bg-[#0058c4] text-white font-bold py-3 px-8 rounded-full transition-all"
+            >
+              새 견적 요청
+            </button>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   return (
-    <section id="contact" className="py-24 bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-16">
+    <section id="contact" className="py-24 bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* Header */}
+        <div className="text-center mb-12">
           <span className="inline-block bg-blue-100 text-[#0073f5] text-sm font-bold px-4 py-1.5 rounded-full mb-4">
             무료 견적 문의
           </span>
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">
-            지금 바로 문의하세요
+          <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">
+            지금 바로 견적을 받아보세요
           </h2>
-          <p className="text-gray-500 text-lg">
-            접수 후 <strong className="text-[#0073f5]">10분 이내</strong> 담당자가 연락드립니다.
-          </p>
+          <p className="text-gray-500 text-lg">접수 후 <strong className="text-[#0073f5]">10분 이내</strong> 담당자가 연락드립니다</p>
         </div>
 
-        <div className="grid lg:grid-cols-5 gap-10 max-w-6xl mx-auto">
-          {/* Contact info */}
-          <div className="lg:col-span-2 space-y-6">
-            <div className="bg-gradient-to-br from-[#0073f5] to-[#003d99] rounded-2xl p-8 text-white">
-              <h3 className="text-xl font-bold mb-6">연락처 정보</h3>
-
-              <div className="space-y-5">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-blue-200 text-sm">대표 전화 (24시간)</p>
-                    <a href="tel:1588-0000" className="text-xl font-extrabold hover:text-yellow-300 transition-colors">
-                      1588-0000
-                    </a>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-blue-200 text-sm">카카오톡 상담</p>
-                    <p className="font-bold">@인성클린</p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-blue-200 text-sm">운영 시간</p>
-                    <p className="font-bold">365일 24시간</p>
-                    <p className="text-blue-200 text-sm">명절·공휴일 포함</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Emergency banner */}
-            <div className="bg-red-50 border border-red-200 rounded-2xl p-6 text-center">
-              <p className="text-red-600 font-bold text-lg mb-2">🚨 지금 막혔나요?</p>
-              <p className="text-red-500 text-sm mb-4">양식 작성보다 전화가 더 빠릅니다!</p>
-              <a
-                href="tel:1588-0000"
-                className="block bg-red-500 hover:bg-red-600 text-white font-extrabold py-3 px-6 rounded-full transition-colors text-lg"
-              >
-                바로 전화하기 1588-0000
-              </a>
-            </div>
-          </div>
-
-          {/* Form */}
-          <div className="lg:col-span-3">
-            {submitted ? (
-              <div className="h-full flex flex-col items-center justify-center text-center p-10 bg-green-50 rounded-2xl border border-green-200">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+        {/* Step indicator */}
+        <div className="flex items-center justify-center gap-3 mb-10">
+          {([1, 2, 3] as Step[]).map((s) => (
+            <div key={s} className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm transition-all duration-300 ${
+                step === s ? "bg-[#0073f5] text-white shadow-lg shadow-blue-300 scale-110"
+                : step > s ? "bg-green-500 text-white"
+                : "bg-gray-200 text-gray-500"
+              }`}>
+                {step > s ? (
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
                   </svg>
-                </div>
-                <h3 className="text-2xl font-extrabold text-gray-900 mb-2">문의가 접수되었습니다!</h3>
-                <p className="text-gray-500">
-                  담당자가 <strong className="text-green-600">10분 이내</strong>로 연락드리겠습니다.
-                  <br />
-                  급한 경우 <a href="tel:1588-0000" className="text-[#0073f5] font-bold underline">1588-0000</a>으로 전화해 주세요.
-                </p>
+                ) : s}
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-5">
+              <span className={`text-sm font-medium hidden sm:block ${step === s ? "text-[#0073f5]" : "text-gray-400"}`}>
+                {s === 1 ? "서비스 선택" : s === 2 ? "방문 정보" : "상세 정보"}
+              </span>
+              {s < 3 && <div className={`w-12 h-0.5 ${step > s ? "bg-green-400" : "bg-gray-200"}`} />}
+            </div>
+          ))}
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+
+            {/* ─── STEP 1 ─── */}
+            {step === 1 && (
+              <div className="p-8 sm:p-10 space-y-8">
+                {/* First visit */}
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-3">
+                    처음 이용하시나요? <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { val: "yes", label: "처음 이용합니다", icon: "👋" },
+                      { val: "no", label: "이전에도 이용했어요", icon: "😊" },
+                    ].map(opt => (
+                      <button key={opt.val} type="button"
+                        onClick={() => setForm(f => ({ ...f, isFirstVisit: opt.val as "yes" | "no" }))}
+                        className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all font-medium text-sm ${
+                          form.isFirstVisit === opt.val
+                            ? "border-[#0073f5] bg-blue-50 text-[#0073f5]"
+                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                        }`}>
+                        <span className="text-xl">{opt.icon}</span>{opt.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Service selection */}
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-3">
+                    서비스 선택 <span className="text-red-500">*</span>
+                    <span className="ml-2 text-sm font-normal text-gray-400">(복수 선택 가능)</span>
+                  </label>
+                  <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                    {serviceOptions.map(opt => (
+                      <button key={opt.id} type="button"
+                        onClick={() => toggleService(opt.id)}
+                        className={`flex flex-col items-center gap-1.5 p-3 sm:p-4 rounded-2xl border-2 transition-all text-xs sm:text-sm font-medium ${
+                          form.services.includes(opt.id)
+                            ? "border-[#0073f5] bg-blue-50 text-[#0073f5] shadow-md"
+                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                        }`}>
+                        <span className="text-2xl">{opt.icon}</span>
+                        <span className="text-center leading-tight">{opt.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Place type */}
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-3">
+                    장소 유형 <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {placeTypes.map(p => (
+                      <button key={p} type="button"
+                        onClick={() => setForm(f => ({ ...f, placeType: p }))}
+                        className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
+                          form.placeType === p
+                            ? "border-[#0073f5] bg-[#0073f5] text-white"
+                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                        }`}>{p}</button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Region */}
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-3">
+                    지역 <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {regions.map(r => (
+                      <button key={r} type="button"
+                        onClick={() => setForm(f => ({ ...f, region: r }))}
+                        className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
+                          form.region === r
+                            ? "border-[#0073f5] bg-[#0073f5] text-white"
+                            : "border-gray-200 hover:border-gray-300 text-gray-600"
+                        }`}>{r}</button>
+                    ))}
+                  </div>
+                </div>
+
+                <button type="button" onClick={() => setStep(2)} disabled={!canNext1}
+                  className="w-full bg-[#0073f5] hover:bg-[#0058c4] disabled:bg-gray-200 disabled:text-gray-400 text-white font-extrabold py-4 rounded-2xl text-lg transition-all shadow-lg hover:shadow-xl disabled:shadow-none">
+                  다음 단계 →
+                </button>
+              </div>
+            )}
+
+            {/* ─── STEP 2 ─── */}
+            {step === 2 && (
+              <div className="p-8 sm:p-10 space-y-7">
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-1.5">
+                    상세 주소 <span className="text-red-500">*</span>
+                  </label>
+                  <input type="text" value={form.address}
+                    onChange={e => setForm(f => ({ ...f, address: e.target.value }))}
+                    placeholder={`${form.region || "서울"} · ${form.placeType || "아파트"} 상세 주소 입력`}
+                    className="w-full border-2 border-gray-200 focus:border-[#0073f5] rounded-2xl px-5 py-3.5 outline-none transition-colors text-gray-800 placeholder-gray-400" />
+                </div>
+
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-3">
+                    즉시 방문이 필요하신가요? <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { val: "yes", label: "네, 즉시 방문해주세요!", icon: "🚨", sub: "30분 내 출동" },
+                      { val: "no", label: "아니요, 날짜 지정할게요", icon: "📅", sub: "원하는 일정에" },
+                    ].map(opt => (
+                      <button key={opt.val} type="button"
+                        onClick={() => setForm(f => ({ ...f, isUrgent: opt.val as "yes" | "no" }))}
+                        className={`flex flex-col items-start gap-1 p-5 rounded-2xl border-2 transition-all ${
+                          form.isUrgent === opt.val
+                            ? "border-[#0073f5] bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
+                        }`}>
+                        <span className="text-2xl">{opt.icon}</span>
+                        <span className={`font-bold text-sm ${form.isUrgent === opt.val ? "text-[#0073f5]" : "text-gray-700"}`}>{opt.label}</span>
+                        <span className="text-xs text-gray-400">{opt.sub}</span>
+                      </button>
+                    ))}
+                  </div>
+                  {form.isUrgent === "no" && (
+                    <div className="mt-3">
+                      <input type="date" value={form.visitDate}
+                        onChange={e => setForm(f => ({ ...f, visitDate: e.target.value }))}
+                        className="w-full border-2 border-gray-200 focus:border-[#0073f5] rounded-2xl px-5 py-3.5 outline-none transition-colors text-gray-800" />
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="block text-base font-bold text-gray-800 mb-1.5">
+                    연락처 <span className="text-red-500">*</span>
+                  </label>
+                  <input type="tel" value={form.phone}
+                    onChange={e => setForm(f => ({ ...f, phone: e.target.value }))}
+                    placeholder="010-0000-0000"
+                    className="w-full border-2 border-gray-200 focus:border-[#0073f5] rounded-2xl px-5 py-3.5 outline-none transition-colors text-gray-800 placeholder-gray-400" />
+                </div>
+
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setStep(1)}
+                    className="flex-1 border-2 border-gray-200 hover:border-gray-300 text-gray-600 font-bold py-4 rounded-2xl transition-all">
+                    ← 이전
+                  </button>
+                  <button type="button" onClick={() => setStep(3)} disabled={!canNext2}
+                    className="flex-[2] bg-[#0073f5] hover:bg-[#0058c4] disabled:bg-gray-200 disabled:text-gray-400 text-white font-extrabold py-4 rounded-2xl transition-all shadow-lg">
+                    다음 단계 →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* ─── STEP 3 ─── */}
+            {step === 3 && (
+              <div className="p-8 sm:p-10 space-y-6">
                 <div className="grid sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      이름 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={form.name}
-                      onChange={handleChange}
-                      required
-                      placeholder="홍길동"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0073f5] focus:border-transparent transition-all"
-                    />
+                    <label className="block text-sm font-bold text-gray-700 mb-1.5">담당 기사 요청 (선택)</label>
+                    <input type="text" value={form.requestedTech}
+                      onChange={e => setForm(f => ({ ...f, requestedTech: e.target.value }))}
+                      placeholder="기사님 성함"
+                      className="w-full border-2 border-gray-200 focus:border-[#0073f5] rounded-2xl px-5 py-3.5 outline-none transition-colors text-gray-800 placeholder-gray-400" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                      연락처 <span className="text-red-500">*</span>
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={form.phone}
-                      onChange={handleChange}
-                      required
-                      placeholder="010-0000-0000"
-                      className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0073f5] focus:border-transparent transition-all"
-                    />
+                    <label className="block text-sm font-bold text-gray-700 mb-1.5">문의 및 요청사항 (선택)</label>
+                    <input type="text" value={form.message}
+                      onChange={e => setForm(f => ({ ...f, message: e.target.value }))}
+                      placeholder="증상, 요청사항 등"
+                      className="w-full border-2 border-gray-200 focus:border-[#0073f5] rounded-2xl px-5 py-3.5 outline-none transition-colors text-gray-800 placeholder-gray-400" />
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    주소 <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="address"
-                    value={form.address}
-                    onChange={handleChange}
-                    required
-                    placeholder="서울 강남구 테헤란로 123"
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0073f5] focus:border-transparent transition-all"
-                  />
+                {/* Event section */}
+                <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border-2 border-yellow-200 rounded-2xl p-6">
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-xl">🎉</span>
+                    <span className="font-extrabold text-orange-600">5% 페이백 이벤트 진행 중!</span>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">계좌번호와 성함을 입력하시면 시공 완료 후 5%를 돌려드립니다.</p>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <input type="text" value={form.eventAccount}
+                      onChange={e => setForm(f => ({ ...f, eventAccount: e.target.value }))}
+                      placeholder="입금받을 계좌번호"
+                      className="border-2 border-yellow-200 focus:border-orange-400 rounded-xl px-4 py-3 outline-none text-sm bg-white placeholder-gray-400 text-gray-800" />
+                    <input type="text" value={form.eventName}
+                      onChange={e => setForm(f => ({ ...f, eventName: e.target.value }))}
+                      placeholder="예금주 성함"
+                      className="border-2 border-yellow-200 focus:border-orange-400 rounded-xl px-4 py-3 outline-none text-sm bg-white placeholder-gray-400 text-gray-800" />
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    서비스 종류 <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    name="service"
-                    value={form.service}
-                    onChange={handleChange}
-                    required
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0073f5] focus:border-transparent transition-all bg-white"
-                  >
-                    <option value="">서비스를 선택해 주세요</option>
-                    {serviceOptions.map((opt) => (
-                      <option key={opt} value={opt}>{opt}</option>
-                    ))}
-                  </select>
+                {/* Summary */}
+                <div className="bg-gray-50 rounded-2xl p-5 space-y-2 text-sm">
+                  <p className="font-bold text-gray-700 mb-3">📋 요청 내용 확인</p>
+                  <div className="grid grid-cols-2 gap-y-2 text-gray-600">
+                    <span className="text-gray-400">서비스</span>
+                    <span className="font-medium">{form.services.map(id => serviceOptions.find(s => s.id === id)?.label).join(", ") || "-"}</span>
+                    <span className="text-gray-400">장소</span>
+                    <span className="font-medium">{form.placeType} · {form.region}</span>
+                    <span className="text-gray-400">긴급출동</span>
+                    <span className="font-medium">{form.isUrgent === "yes" ? "🚨 즉시 출동" : `📅 ${form.visitDate || "날짜 미정"}`}</span>
+                    <span className="text-gray-400">연락처</span>
+                    <span className="font-medium">{form.phone}</span>
+                  </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1.5">
-                    문의 내용
-                  </label>
-                  <textarea
-                    name="message"
-                    value={form.message}
-                    onChange={handleChange}
-                    rows={4}
-                    placeholder="증상이나 요청사항을 자세히 적어주시면 더 빠른 견적을 드릴 수 있습니다."
-                    className="w-full border border-gray-200 rounded-xl px-4 py-3 text-gray-900 focus:outline-none focus:ring-2 focus:ring-[#0073f5] focus:border-transparent transition-all resize-none"
-                  />
+                <div className="flex gap-3">
+                  <button type="button" onClick={() => setStep(2)}
+                    className="flex-1 border-2 border-gray-200 hover:border-gray-300 text-gray-600 font-bold py-4 rounded-2xl transition-all">
+                    ← 이전
+                  </button>
+                  <button type="submit" disabled={loading}
+                    className="flex-[2] bg-[#0073f5] hover:bg-[#0058c4] disabled:bg-gray-300 text-white font-extrabold py-4 rounded-2xl text-lg transition-all shadow-xl hover:shadow-2xl flex items-center justify-center gap-2">
+                    {loading ? (
+                      <><svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/></svg>접수 중...</>
+                    ) : "견적 요청하기 ✓"}
+                  </button>
                 </div>
-
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#0073f5] hover:bg-[#0058c4] disabled:bg-gray-300 text-white font-extrabold py-4 px-8 rounded-xl text-lg transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-                      </svg>
-                      접수 중...
-                    </>
-                  ) : (
-                    <>
-                      무료 견적 신청하기
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </>
-                  )}
-                </button>
-
-                <p className="text-center text-xs text-gray-400">
-                  개인정보는 견적 문의 목적으로만 사용되며 제3자에게 제공되지 않습니다.
-                </p>
-              </form>
+                <p className="text-center text-xs text-gray-400">개인정보는 견적 목적으로만 사용되며 제3자에게 제공되지 않습니다.</p>
+              </div>
             )}
           </div>
+        </form>
+
+        {/* Emergency CTA */}
+        <div className="mt-8 bg-red-50 border border-red-200 rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-red-600 text-lg">🚨 지금 당장 막혔나요?</p>
+            <p className="text-red-400 text-sm">양식보다 전화가 훨씬 빠릅니다!</p>
+          </div>
+          <a href="tel:1588-0000"
+            className="bg-red-500 hover:bg-red-600 text-white font-extrabold py-3 px-8 rounded-full transition-all shadow-lg whitespace-nowrap">
+            📞 1588-0000 바로 전화
+          </a>
         </div>
       </div>
     </section>

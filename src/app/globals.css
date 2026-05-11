@@ -4,30 +4,36 @@
 
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css');
 
-:root {
-  --primary: #0073f5;
-  --primary-dark: #0058c4;
-}
-
-* {
-  scroll-behavior: smooth;
-}
+* { scroll-behavior: smooth; box-sizing: border-box; }
 
 body {
   font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
 }
 
+@layer utilities {
+  .animate-in {
+    animation-fill-mode: both;
+  }
+  .fade-in {
+    animation-name: fadeIn;
+    animation-duration: 150ms;
+  }
+  .zoom-in-95 {
+    animation-name: zoomIn95;
+    animation-duration: 150ms;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes zoomIn95 {
+    from { transform: scale(.95); opacity: 0; }
+    to   { transform: scale(1);   opacity: 1; }
+  }
+}
+
 @layer components {
   .btn-primary {
-    @apply bg-[#0073f5] hover:bg-[#0058c4] text-white font-bold py-3 px-6 rounded-lg transition-all duration-200 shadow-md hover:shadow-lg;
-  }
-  .btn-emergency {
-    @apply bg-red-600 hover:bg-red-700 text-white font-bold py-4 px-8 rounded-full text-lg transition-all duration-200 shadow-xl hover:shadow-2xl animate-pulse;
-  }
-  .section-title {
-    @apply text-3xl md:text-4xl font-extrabold text-gray-900 text-center mb-4;
-  }
-  .section-subtitle {
-    @apply text-lg text-gray-500 text-center mb-12;
+    @apply bg-[#0073f5] hover:bg-[#0058c4] text-white font-bold py-3 px-6 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg;
   }
 }
