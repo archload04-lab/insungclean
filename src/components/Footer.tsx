@@ -65,7 +65,7 @@ export default function Footer() {
               </li>
               <li>
                 <span className="text-gray-500 block text-xs">대표자</span>
-                홍길동
+                손유정
               </li>
               <li>
                 <span className="text-gray-500 block text-xs">사업자등록번호</span>
